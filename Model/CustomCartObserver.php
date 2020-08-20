@@ -5,32 +5,31 @@ use Magento\Framework\App\Action\Action;
 use Magento\Framework\View\Result\PageFactory;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Filesystem; 
-use AHT\Lession8\Model\DataFactory; 
+use AHT\Lession8\Model\ProductLogFactory; 
 
 class CustomCartObserver implements \Magento\Framework\Event\ObserverInterface
 {
 	protected $_pageFactory;
 	protected $_filesystem;
-	protected $_dataFactory;
+	protected $_productLogFactory;
 	protected $_productResource;
  
      public function __construct(
-		 Context $context,
 		 PageFactory $pageFactory,
 		 Filesystem $filesystem,
-		 \Magento\Catalog\Model\ResourceModel\Product $productResource,
-		 DataFactory $dataFactory
+		 \AHT\Lession8\Model\ResourceModel\ProductLog $productResource,
+		 ProductLogFactory $productLogFactory
 		 )
      {
 			$this->_pageFactory = $pageFactory;
 			$this->_filesystem = $filesystem;
-			$this->_dataFactory = $dataFactory;
+			$this->_productLogFactory = $productLogFactory;
 			$this->_productResource = $productResource;
      }
 
 	public function execute(\Magento\Framework\Event\Observer $observer)
 	{	
-		$model = $this->_dataFactory->create();
+		$model = $this->_productLogFactory->create();
 		$eventInfo = $observer->getData('info');
 		$qty   = $eventInfo['qty'];
 
@@ -44,7 +43,6 @@ class CustomCartObserver implements \Magento\Framework\Event\ObserverInterface
 			'time'    => date('d-m-Y',time())
 		];
 		$model->addData($data);
-		$model->save();
-	
+		$this->_productResource->save($model);
 	}
 }
